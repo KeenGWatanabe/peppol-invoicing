@@ -1,0 +1,98 @@
+Here's a **Google Apps Script** example that extracts invoice data from a Google Sheet, formats it into a **basic PEPPOL-compatible XML**, and emails it to a Peppol Access Point's submission address:
+
+---
+
+### **Example Scenario**
+- **Sheet Name**: `Invoices`  
+- **Columns**: `Date` (A), `Invoice Number` (B), `Amount` (C), `Buyer UEN` (D)  
+- **Peppol Access Point**: Uses email submission (e.g., `submissions@your-access-point.com`).  
+
+---
+
+### **Google Apps Script Code**
+```javascript
+function sendPEPPOLInvoice() {
+  // 1. Get invoice data from Google Sheet
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Invoices");
+  const data = sheet.getDataRange().getValues();
+  
+  // 2. Process the latest invoice (assuming row 1 is headers)
+  const latestInvoice = data[data.length - 1]; // Last row
+  const [date, invoiceNumber, amount, buyerUEN] = latestInvoice;
+
+  // 3. Generate PEPPOL BIS Billing 3.0 XML (simplified)
+  const peppolXML = `
+    <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+             xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+      <cbc:IssueDate>${Utilities.formatDate(new Date(date), "GMT+8", "yyyy-MM-dd")}</cbc:IssueDate>
+      <cbc:ID>${invoiceNumber}</cbc:ID>
+      <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode> <!-- Standard invoice code -->
+      <cbc:TaxCurrencyCode>SGD</cbc:TaxCurrencyCode>
+      <cbc:DocumentCurrencyCode>SGD</cbc:DocumentCurrencyCode>
+      <cbc:AccountingSupplierParty>
+        <cbc:CustomerAssignedAccountID>YOUR_UEN_HERE</cbc:CustomerAssignedAccountID>
+      </cbc:AccountingSupplierParty>
+      <cbc:AccountingCustomerParty>
+        <cbc:CustomerAssignedAccountID>${buyerUEN}</cbc:CustomerAssignedAccountID>
+      </cbc:AccountingCustomerParty>
+      <cbc:LegalMonetaryTotal>
+        <cbc:TaxExclusiveAmount>${amount}</cbc:TaxExclusiveAmount>
+        <cbc:TaxInclusiveAmount>${amount}</cbc:TaxInclusiveAmount>
+        <cbc:PayableAmount>${amount}</cbc:PayableAmount>
+      </cbc:LegalMonetaryTotal>
+    </Invoice>
+  `;
+
+  // 4. Email the XML to the Peppol Access Point
+  const recipient = "submissions@your-access-point.com"; // Replace with AP's email
+  const subject = `PEPPOL Invoice ${invoiceNumber}`;
+  const body = "Attached is the PEPPOL invoice in XML format.";
+  
+  GmailApp.sendEmail(recipient, subject, body, {
+    attachments: [{
+      fileName: `PEPPOL_${invoiceNumber}.xml`,
+      mimeType: "application/xml",
+      content: peppolXML
+    }]
+  });
+
+  // 5. Log success
+  console.log(`Invoice ${invoiceNumber} sent to Peppol Access Point.`);
+}
+```
+
+---
+
+### **Key Notes**:
+1. **PEPPOL XML Format**:  
+   - This is a **simplified** version of the PEPPOL BIS Billing 3.0 standard.  
+   - Real-world use requires **full validation** (e.g., GST fields, legal entity details).  
+
+2. **Access Point Submission**:  
+   - Some Access Points accept invoices via **email with XML attachments**.  
+   - Others require **API integration** (modify the script to use `UrlFetchApp` for HTTP requests).  
+
+3. **Prerequisites**:  
+   - Replace `YOUR_UEN_HERE` with your business UEN (e.g., `123456789X` for Singapore).  
+   - Ensure the Access Point supports email submissions (check their documentation).  
+
+4. **Trigger Automation**:  
+   - Run the script **manually** from the Apps Script editor.  
+   - Or set a **time-driven trigger** (e.g., daily at 5 PM):  
+     ```javascript
+     function createTrigger() {
+       ScriptApp.newTrigger("sendPEPPOLInvoice")
+         .timeBased()
+         .everyDays(1)
+         .atHour(17)
+         .create();
+     }
+     ```
+
+---
+
+### **Next Steps**:
+- **Test with a Peppol validator** (e.g., [PEPPOL Validator](https://peppol.helger.com/public/locale-en_US/menuitem-validation)).  
+- **Add more fields** (e.g., line items, GST rates) as needed.  
+
+Would you like help extending this script for specific requirements (e.g., digital signatures)?
