@@ -34,7 +34,9 @@ Certainly! While Google Sheets itself isn't a direct Peppol Access Point, you ca
 
 ### **Key Requirements for Singapore (InvoiceNow)**
 - **Peppol ID**: Your business and your buyer must have Peppol IDs (e.g., your UEN + `:inv` for InvoiceNow).  
-- **Access Point Provider**: Choose one certified for Peppol (e.g., [IMDA’s list](https://www.imda.gov.sg/regulations-and-licensing-listing/invoicenow-for-businesses)).  
+- **Access Point Provider**: Choose one certified for Peppol (e.g., [IMDA’s list](https://www.imda.gov.sg/regulations-and-licensing-listing/invoicenow-for-businesses)).
+
+- *accredited providers*: https://www.imda.gov.sg/how-we-can-help/nationwide-e-invoicing-framework/peppol-service-provider-accreditation-scheme 
 - **Data Validation**: Ensure your sheet includes mandatory fields like UEN, GST details (if applicable), and invoice numbering.
 
 ---
