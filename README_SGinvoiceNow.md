@@ -1,3 +1,6 @@
+Validex tool:
+https://singapore.validex.net/en/login
+
 Certainly! While Google Sheets itself isn't a direct Peppol Access Point, you can use it as part of your workflow to participate in Singapore's **InvoiceNow** (Peppol) network by integrating it with a Peppol-certified solution. Here's a simple example:
 
 ---
